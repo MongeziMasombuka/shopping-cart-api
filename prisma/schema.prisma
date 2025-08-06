@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int        @id @default(autoincrement())
+  email     String?    @unique
+  name      String?
+  cartItems CartItem[]
+}
+
+model Product {
+  id          Int        @id @default(autoincrement())
+  name        String
+  slug        String     @unique
+  description String
+  price       Float
+  quantity    Int
+  category    String
+  rating      Float
+  image       String
+  cartItems   CartItem[]
+}
+
+model CartItem {
+  id        Int @id @default(autoincrement())
+  quantity  Int
+  productId Int
+  userId    Int
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([userId, productId], name: "userId_productId") // ✅ Each user can only have one entry per product
+}
