@@ -8,14 +8,15 @@ datasource db {
 }
 
 model User {
-  id        Int        @id @default(autoincrement())
-  email     String?    @unique
-  name      String?
+  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String     @unique
+  name      String
+  password  String
   cartItems CartItem[]
 }
 
 model Product {
-  id          Int        @id @default(autoincrement())
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String
   slug        String     @unique
   description String
@@ -28,10 +29,10 @@ model Product {
 }
 
 model CartItem {
-  id        Int @id @default(autoincrement())
+  id        Int    @id @default(autoincrement())
   quantity  Int
-  productId Int
-  userId    Int
+  productId String @db.Uuid
+  userId    String @db.Uuid
 
   product Product @relation(fields: [productId], references: [id])
   user    User    @relation(fields: [userId], references: [id])

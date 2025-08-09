@@ -2,7 +2,9 @@ import prisma from "../models/prismaClient.js";
 
 // GET /cart?userId=1
 export const getCart = async (req, res, next) => {
-  const userId = parseInt(req.query.userId); // Add from JWT/session
+  //const userId = parseInt(req.query.userId); // Add from JWT/session
+  //const { userId } = req.body;
+  const userId = req.user.id;
 
   try {
     const cartItems = await prisma.cartItem.findMany({
@@ -19,8 +21,9 @@ export const getCart = async (req, res, next) => {
 };
 
 export const addToCart = async (req, res, next) => {
-  const { userId, productId, quantity } = req.body;
-
+  const { productId } = req.body;
+  const userId = req.user.id;
+  const quantity = parseInt(req.body.quantity, 10);
   try {
     const cartItem = await prisma.cartItem.upsert({
       where: {
@@ -49,8 +52,8 @@ export const addToCart = async (req, res, next) => {
 };
 // PUT /cart/:id
 export const updateCart = async (req, res, next) => {
-  const id = parseInt(req.params.id);
-  const { quantity } = req.body;
+  const id = req.user.id;
+  const quantity = parseInt(req.body.quantity);
 
   try {
     const updatedItem = await prisma.cartItem.update({
@@ -67,12 +70,8 @@ export const updateCart = async (req, res, next) => {
 
 // DELETE /cart/:id
 export const removeFromCart = async (req, res, next) => {
-  const userId = parseInt(req.params.userId, 10);
-  const productId = parseInt(req.params.productId, 10);
-
-  if (isNaN(userId) || isNaN(productId)) {
-    return res.status(400).json({ error: "Invalid userId or productId" });
-  }
+  const userId = req.user.id;
+  const productId = req.params.productId;
 
   try {
     await prisma.cartItem.delete({
@@ -91,11 +90,7 @@ export const removeFromCart = async (req, res, next) => {
 };
 
 export const clearCart = async (req, res, next) => {
-  const userId = parseInt(req.params.userId, 10);
-
-  if (isNaN(userId)) {
-    return res.status(400).json({ error: "Invalid userId " });
-  }
+  const userId = req.user.id;
 
   try {
     const result = await prisma.cartItem.deleteMany({
